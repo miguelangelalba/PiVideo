@@ -8,9 +8,9 @@ import os
 #Const
 
 def timestamp():
-    dt = datetime.now()
+    return datetime.now().isoformat(timespec= 'seconds')
     #Returns a timsStam at the instant it runs in the function.
-    return dt.isoformat(timespec= 'seconds')
+    #return dt
 
 def createDirRec(folderName):
     try:
@@ -23,9 +23,11 @@ def rec (camera,folderName,ts):
     #I hace to format the timestamp becouse Raspivid doesn't accept the ":" in a file name.
     ts = ts.replace(':','') 
     camera.resolution = (1920, 1080)
+    camera.framerate = (5)
     camera.start_preview()
-    camera.start_recording('/media/pi/0113-44041/' + folderName + '/' + ts + '.h264')
-    camera.wait_recording(60)
+    camera.annotate_text = timestamp()
+    camera.start_recording('/media/pi/0113-44041/' + folderName + '/' + ts + '.h264',sps_timing=True,bitrate=10000000)
+    camera.wait_recording(3600)
     camera.stop_recording()
 
 
