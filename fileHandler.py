@@ -9,15 +9,16 @@ from datetime import datetime, time
 SERVER = '192.168.1.80'
 USER = 'pi'
 FILE = '/media/pi/0113-44041/myVideos/2020-12-30T204223.h264'
-DESTINATIONPATH = '/media/pi/Seagate Expansion Drive/PiCamera'
-REGISTERNAME = "register.txt"
-REGISTERNAMETODELATE = "registerToDelete.txt"
+DESTINATION_PATH = '/media/pi/Seagate Expansion Drive/PiCamera'
+REGISTER_NAME = "register.txt"
+REGISTER_NAME_TO_DELATE = "registerToDelete.txt"
 
-def sshLogin():
+def sshLogin(server,user):
     try:
         sshClientLogin = paramiko.SSHClient()
         sshClientLogin.set_missing_host_key_policy( paramiko.AutoAddPolicy() )
-        sshClientLogin.connect(SERVER, username=USER)
+        sshClientLogin.connect(server, username=user)
+        print('Conexión con el ' + server + ' establecida')
         return sshClientLogin
     except paramiko.ssh_exception.AuthenticationException as e:
         print('Contraseña incorrecta')
@@ -27,6 +28,7 @@ def closeClients(sshClientLogout,scpClient):
     scpClient.close()
 
 def scptransfer(sshClient,origin,destination):
+    
     scpClient = scp.SCPClient(sshClient.get_transport())
     print ('Trasnfiriendo archivo:' + origin + datetime.now().isoformat(timespec= 'seconds'))
     scpClient.put(origin,destination)
@@ -36,14 +38,14 @@ def scptransfer(sshClient,origin,destination):
 
 def recRegister (recName,pathRegister):
 
-    #register = open(pathRegister + REGISTERNAME,"a")
-    register = open(REGISTERNAME,"a")
+    #register = open(pathRegister + REGISTER_NAME,"a")
+    register = open(recName,"a")
     register.write(recName + "\n")
     register.close()
 
 def recRegisterToDelete (recName,pathRegister):
     
-    register = open(pathRegister + ToDelete,"a")
+    register = open(pathRegister + recName,"a")
     register.write(recName + ".\n")
     register.close()
 
@@ -70,15 +72,15 @@ def delLineStrings(recName,fileName,path):
 if __name__ == '__main__':
     try:
         #sshClient = sshLogin()
-        #scpClient = scptransfer(sshClient,FILE,DESTINATIONPATH)
+        #scpClient = scptransfer(sshClient,FILE,DESTINATION_PATH)
         #closeClients(sshClient,scpClient)
 
         for i in range(10):
 
             recName = "Linea " + str(i)
             recRegister(recName,"/")
-        fileReader(REGISTERNAME,DESTINATIONPATH)
-        delLineStrings("Linea 4",REGISTERNAME,DESTINATIONPATH)
+        fileReader(REGISTER_NAME,DESTINATION_PATH)
+        delLineStrings("Linea 4",REGISTER_NAME,DESTINATION_PATH)
 
     except paramiko.ssh_exception.AuthenticationException as e:
         print('Contraseña incorrecta')
