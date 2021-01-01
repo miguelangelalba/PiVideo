@@ -5,6 +5,7 @@ from picamera import PiCamera
 from datetime import datetime, time
 import os
 from fileHandler import *
+import threading
 
 #Const
 SERVER = '192.168.1.80'
@@ -51,14 +52,15 @@ if __name__ == "__main__":
         createDirRec(folder)
         ts = timestamp()
         pathRec = rec(camera,folder,PATH_REC_FOLDER,ts)
-
         sshClient = sshLogin(SERVER,USER)
         scptransfer(sshClient,pathRec,SERVER_PATH)
-        scpClient = scptransfer(sshClient,pathRec,SERVER_PATH)
-        closeClients(sshClient,scpClient)
-
+        t1 = threading.Thread(name = "thread1",target=scptransfer,args=(sshClient,pathRec,SERVER_PATH))
+        t1.start()
+        ts = timestamp()
+        pathRec = rec(camera,folder,PATH_REC_FOLDER,ts)
     finally:
 
-        print("Cerramdo cámara")
+        print("Cerrando cámara")
         camera.close()
-        closeClients(sshClient,scpClient)
+        sshLogout(sshClient)
+        t1.join()
