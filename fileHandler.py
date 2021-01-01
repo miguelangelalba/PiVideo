@@ -3,13 +3,15 @@
 import scp
 import paramiko
 from datetime import datetime, time
+from os import remove
+from camera import timestamp
 
 #Const
 #I don't need password since i have the public key on the server.
 SERVER = '192.168.1.80'
 USER = 'pi'
-FILE = '/media/pi/0113-44041/myVideos/2020-12-30T204223.h264'
-DESTINATION_PATH = '/media/pi/Seagate Expansion Drive/PiCamera'
+PI_PATH = '/media/pi/0113-44041/myVideos/'
+SERVER_PATH = '/media/pi/Seagate Expansion Drive/PiCamera'
 REGISTER_NAME = "register.txt"
 REGISTER_NAME_TO_DELATE = "registerToDelete.txt"
 
@@ -23,40 +25,39 @@ def sshLogin(server,user):
     except paramiko.ssh_exception.AuthenticationException as e:
         print('Contraseña incorrecta')
 
-def closeClients(sshClientLogout,scpClient):
-    sshClientLogout.close()
-    scpClient.close()
+def sshLogout(sshClient):
+    sshClient.close()
 
-def scptransfer(sshClient,origin,destination):
+def scptransfer(sshClient,origin,destination,regDelName,recName):
     
     scpClient = scp.SCPClient(sshClient.get_transport())
-    print ('Trasnfiriendo archivo:' + origin + datetime.now().isoformat(timespec= 'seconds'))
+    print ( timestamp() + ' Trasnfiriendo archivo: ' + origin)
     scpClient.put(origin,destination)
-    print ('Archivo trasnferido: ' + datetime.now().isoformat(timespec= 'seconds'))
+    print (timestamp + 'Archivo trasnferido a:' + destination)
+    recRegisterToDelete(origin,regDelName,recName)
+    scpClient.close()
 
-    return scpClient
+def recRegister (pathRegister,registerName,recName):
 
-def recRegister (recName,pathRegister):
-
-    #register = open(pathRegister + REGISTER_NAME,"a")
-    register = open(recName,"a")
+    register = open(pathRegister + registerName,"a")
+    #register = open(recName,"a")
     register.write(recName + "\n")
     register.close()
 
-def recRegisterToDelete (recName,pathRegister):
+def recRegisterToDelete (pathRegister,regDelName,recName):
     
     register = open(pathRegister + recName,"a")
     register.write(recName + ".\n")
     register.close()
 
-def fileReader (fileName,path):
+def fileReader (path,fileName):
     #This function in the future can will delete. It's just to make some proves.
     f = open(fileName,"r")
     print(f.read())
     f.close()
     return f
 
-def delLineStrings(recName,fileName,path):
+def delLineStrings(path,recName,fileName):
 
     f = open(fileName,"r")
     lines = f.readlines()
@@ -67,20 +68,24 @@ def delLineStrings(recName,fileName,path):
         if line!=recName +"\n":
             f.write(line)
 
+def removeFile(path,recName):
+    pathRecName = path + recName
+    remove(pathRecName)
+
 
 
 if __name__ == '__main__':
     try:
         #sshClient = sshLogin()
         #scpClient = scptransfer(sshClient,FILE,DESTINATION_PATH)
-        #closeClients(sshClient,scpClient)
+        #closeClients(sshClient)
 
         for i in range(10):
 
             recName = "Linea " + str(i)
-            recRegister(recName,"/")
-        fileReader(REGISTER_NAME,DESTINATION_PATH)
-        delLineStrings("Linea 4",REGISTER_NAME,DESTINATION_PATH)
+            recRegister(PI_PATH,REGISTER_NAME,'recName')
+        fileReader(REGISTER_NAME,SERVER_PATH)
+        delLineStrings("Linea 4",REGISTER_NAME,SERVER_PATH)
 
     except paramiko.ssh_exception.AuthenticationException as e:
         print('Contraseña incorrecta')

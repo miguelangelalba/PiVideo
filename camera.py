@@ -11,7 +11,10 @@ import threading
 SERVER = '192.168.1.80'
 USER = 'pi'
 SERVER_PATH = '/media/pi/Seagate Expansion Drive/PiCamera'
-PATH_REC_FOLDER = "/media/pi/276E-0D81/"
+PI_PATH = '/media/pi/276E-0D81/'
+REGISTER_NAME = 'register.txt'
+REGISTER_NAME_TO_DELATE = 'registerToDelete.txt'
+
 
 def timestamp():
     return datetime.now().isoformat(timespec= 'seconds')
@@ -19,28 +22,30 @@ def timestamp():
 
 def createDirRec(folderName):
     try:
-        os.mkdir(PATH_REC_FOLDER + folderName)
+        os.mkdir(PI_PATH + folderName)
         print ('Creando folder ' + folderName)
     except OSError as e:
         print(e)
 
-def rec (camera,folderName,path,ts):
+def rec (camera,folderName,path,ts,regName),:
     #I hace to format the timestamp becouse Raspivid doesn't accept the ":" in a file name.
     
     ts = ts.replace(':','')
-    fileName = ts + '.h264'
-    pathFileName = path + folderName + '/' + fileName
+    recName = ts + '.h264'
+    pathRecName = path + folderName + '/' + recName
     camera.resolution = (1920, 1080)
     camera.exposure_mode = ('night')
     camera.clock_mode = ('raw')
     camera.framerate = (5)
     camera.start_preview()
     camera.annotate_text = timestamp()
-    print("Grabando archivo: " + fileName + '' + ts)
-    camera.start_recording(pathFileName,sps_timing=True,bitrate=10000000)
+    print(timestamp() + " Grabando archivo: " + recName)
+    camera.start_recording(pathRecName,sps_timing=True,bitrate=10000000)
     camera.wait_recording(3600)
     camera.stop_recording()
-    print("Grabación finalizada archivo: " + fileName + timestamp())
+    print(timestamp() + " Grabación finalizada archivo: " + fileName)
+    recRegister(path,regName,recName)
+    recRegisterToDelete(fileName,path)
     return pathFileName
 
 if __name__ == "__main__":
@@ -51,16 +56,15 @@ if __name__ == "__main__":
     try:
         createDirRec(folder)
         ts = timestamp()
-        pathRec = rec(camera,folder,PATH_REC_FOLDER,ts)
+        recName = rec(camera,folder,PI_PATH,ts,REGISTER_NAME)
         sshClient = sshLogin(SERVER,USER)
-        scptransfer(sshClient,pathRec,SERVER_PATH)
-        t1 = threading.Thread(name = "thread1",target=scptransfer,args=(sshClient,pathRec,SERVER_PATH))
+        t1 = threading.Thread(name = "thread1",target=scptransfer,args=(sshClient,PI_PATH,SERVER_PATH,REGISTER_NAME_TO_DELATE,recName))
         t1.start()
         ts = timestamp()
-        pathRec = rec(camera,folder,PATH_REC_FOLDER,ts)
+        pathRec = rec(camera,folder,PI_PATH,ts)
     finally:
 
-        print("Cerrando cámara")
+        print(timestamp() + "Cerrando cámara")
         camera.close()
         sshLogout(sshClient)
         t1.join()
