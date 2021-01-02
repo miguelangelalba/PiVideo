@@ -26,7 +26,6 @@ def createDirRec(folderName):
         print ('Creando folder ' + folderName)
     except OSError as e:
         print(e)
-
 def rec (camera,folderName,path,ts,regName,regDelName):
     #I hace to format the timestamp becouse Raspivid doesn't accept the ":" in a file name.
     
@@ -56,12 +55,12 @@ if __name__ == "__main__":
     try:
         createDirRec(folder)
         ts = timestamp()
-        recName = rec(camera,folder,PI_PATH,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE9
+        recName = rec(camera,folder,PI_PATH,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
         sshClient = sshLogin(SERVER,USER)
         t1 = threading.Thread(name = "thread1",target=scptransfer,args=(sshClient,PI_PATH,SERVER_PATH,REGISTER_NAME_TO_DELATE,recName))
         t1.start()
         ts = timestamp()
-        pathRec = rec(camera,folder,PI_PATH,ts)
+        recName = rec(camera,folder,PI_PATH,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
     finally:
 
         print(timestamp() + "Cerrando cámara")

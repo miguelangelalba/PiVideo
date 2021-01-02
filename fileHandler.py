@@ -30,16 +30,18 @@ def sshLogout(sshClient):
 
 def scptransfer(sshClient,origin,destination,regDelName,recName):
     
+    pathOrigin = origin + recName 
     scpClient = scp.SCPClient(sshClient.get_transport())
     print ( timestamp() + ' Trasnfiriendo archivo: ' + origin)
     scpClient.put(origin,destination)
-    print (timestamp + 'Archivo trasnferido a:' + destination)
+    print (timestamp() + ' Archivo trasnferido a:' + destination)
     recRegisterToDelete(origin,regDelName,recName)
     scpClient.close()
 
 def recRegister (pathRegister,registerName,recName):
 
     register = open(pathRegister + registerName,"a")
+    print (timestamp() + ' Se ha añadido el la grabación a ' + registerName)
     #register = open(recName,"a")
     register.write(recName + "\n")
     register.close()
