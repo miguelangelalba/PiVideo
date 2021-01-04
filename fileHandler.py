@@ -30,10 +30,10 @@ def sshLogout(sshClient):
 
 def scptransfer(sshClient,origin,destination,regDelName,recName):
     
-    pathOrigin = origin + recName 
+    pathOriginName = origin + recName 
     scpClient = scp.SCPClient(sshClient.get_transport())
-    print ( timestamp() + ' Trasnfiriendo archivo: ' + origin)
-    scpClient.put(origin,destination)
+    print ( timestamp() + ' Trasnfiriendo archivo: ' + pathOriginName)
+    scpClient.put(pathOriginName,destination)
     print (timestamp() + ' Archivo trasnferido a:' + destination)
     recRegisterToDelete(origin,regDelName,recName)
     scpClient.close()
@@ -41,15 +41,15 @@ def scptransfer(sshClient,origin,destination,regDelName,recName):
 def recRegister (pathRegister,registerName,recName):
 
     register = open(pathRegister + registerName,"a")
-    print (timestamp() + ' Se ha añadido el la grabación a ' + registerName)
+    print (timestamp() + ' Se ha añadido la grabación a ' + registerName)
     #register = open(recName,"a")
     register.write(recName + "\n")
     register.close()
 
 def recRegisterToDelete (pathRegister,regDelName,recName):
     
-    register = open(pathRegister + recName,"a")
-    register.write(recName + ".\n")
+    register = open(pathRegister + regDelName,"a")
+    register.write(recName + "\n")
     register.close()
 
 def fileReader (path,fileName):
@@ -57,22 +57,39 @@ def fileReader (path,fileName):
     f = open(fileName,"r")
     print(f.read())
     f.close()
+    #for line  in f
+
     return f
 
 def delLineStrings(path,recName,fileName):
 
-    f = open(fileName,"r")
-    lines = f.readlines()
-    f.close
-    f = open(fileName,"w")
+    pathFileName = path + fileName
+    lines = readLines(path,fileName)
+    f = open(pathFileName,"w")
 
     for line in lines:
-        if line!=recName +"\n":
+        if (line == recName):
+            pass
+        else:
             f.write(line)
+            print (timestamp() + ' Archivo: ' + recName + ' borrado')
 
-def removeFile(path,recName):
-    pathRecName = path + recName
-    remove(pathRecName)
+def readLines(path,fileName):
+    pathFileName = path + fileName
+    f = open(pathFileName,"r")
+    lines = f.readlines()
+    f.close
+    return lines
+
+def removeFile(path,regToDelete):
+
+    lines = readLines(path,regToDelete)
+
+    for line in lines:
+        pathRecName = path + line
+        remove(pathRecName.replace('\n',""))
+        print (timestamp() + ' Archivo: ' + line + ' borrado')
+        delLineStrings(path,line,regToDelete)    
 
 
 
