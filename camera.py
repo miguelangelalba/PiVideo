@@ -46,16 +46,27 @@ def rec (camera,path,ts,regName,regDelName):
     print(timestamp() + " Grabación finalizada archivo: " + recName)
     recRegister(path,regName,recName)
     return recName
+def filesManagSend(files,server,user,origin,destination,regDelName):
+    sshClient = sshLogin(server,user)
+    for f in files:
+        scptransfer(sshClient,origin,destination,regDelName,f)
+    sshLogout(sshClient)
+
 
 if __name__ == "__main__":
 
   
     #path = '/media/pi/0113-44041/'
     camera = PiCamera()
+    files = []
     try:
         createDirRec(FOLDER_NAME)
         ts = timestamp()
         piPath = PI_PATH + FOLDER_NAME + '/'
+        files = Files(piPath)
+        if len(files) > 0 :
+            t2 = threading.Thread( name = "tread2",target= filesManagSend,args=(files,SERVER,USER,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE))
+            t2.start()
         recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
         sshClient = sshLogin(SERVER,USER)
         t1 = threading.Thread(name = "thread1",target=scptransfer,args=(sshClient,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE,recName))
@@ -68,3 +79,5 @@ if __name__ == "__main__":
         sshLogout(sshClient)
         removeFile(piPath,REGISTER_NAME_TO_DELATE)
         t1.join()
+        if len(files) > 0 :
+            t2.join()

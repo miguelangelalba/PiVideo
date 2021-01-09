@@ -3,14 +3,15 @@
 import scp
 import paramiko
 from datetime import datetime, time
-from os import remove
+import os 
+import re
 from camera import timestamp
 
 #Const
 #I don't need password since i have the public key on the server.
 SERVER = '192.168.1.80'
 USER = 'pi'
-PI_PATH = '/media/pi/0113-44041/myVideos/'
+PI_PATH = '/media/pi/276E-0D81/myVideos/'
 SERVER_PATH = '/media/pi/Seagate Expansion Drive/PiCamera'
 REGISTER_NAME = "register.txt"
 REGISTER_NAME_TO_DELATE = "registerToDelete.txt"
@@ -87,24 +88,32 @@ def removeFile(path,regToDelete):
 
     for line in lines:
         pathRecName = path + line
-        remove(pathRecName.replace('\n',""))
+        os.remove(pathRecName.replace('\n',""))
         print (timestamp() + ' Archivo: ' + line + ' borrado')
         delLineStrings(path,line,regToDelete)    
 
-
+def Files(path):
+    contents = os.listdir(path)
+    contentsToSend = []
+    for content in contents:
+        if re.search('(?<=).h264',content):
+            contentsToSend.append(content)
+    print (timestamp() + ' Archivos no enviados: ' + str(contentsToSend))
+    return contentsToSend
 
 if __name__ == '__main__':
     try:
+        print (Files(PI_PATH))
         #sshClient = sshLogin()
         #scpClient = scptransfer(sshClient,FILE,DESTINATION_PATH)
         #closeClients(sshClient)
 
-        for i in range(10):
+        #for i in range(10):
 
-            recName = "Linea " + str(i)
-            recRegister(PI_PATH,REGISTER_NAME,'recName')
-        fileReader(REGISTER_NAME,SERVER_PATH)
-        delLineStrings("Linea 4",REGISTER_NAME,SERVER_PATH)
+        #    recName = "Linea " + str(i)
+        #    recRegister(PI_PATH,REGISTER_NAME,'recName')
+        #fileReader(REGISTER_NAME,SERVER_PATH)
+        #delLineStrings("Linea 4",REGISTER_NAME,SERVER_PATH)
 
     except paramiko.ssh_exception.AuthenticationException as e:
         print('Contraseña incorrecta')
