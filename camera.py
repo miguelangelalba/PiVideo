@@ -6,6 +6,7 @@ from datetime import datetime, time
 import os
 from fileHandler import *
 import threading
+from concurrent.futures import ThreadPoolExecutor
 
 #Const
 SERVER = '192.168.1.80'
@@ -59,25 +60,31 @@ if __name__ == "__main__":
     #path = '/media/pi/0113-44041/'
     camera = PiCamera()
     files = []
+    executor = ThreadPoolExecutor(max_workers=3)
     try:
+
         createDirRec(FOLDER_NAME)
         ts = timestamp()
         piPath = PI_PATH + FOLDER_NAME + '/'
         files = Files(piPath)
         if len(files) > 0 :
-            t2 = threading.Thread( name = "tread2",target= filesManagSend,args=(files,SERVER,USER,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE))
-            t2.start()
-        recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
-        sshClient = sshLogin(SERVER,USER)
-        t1 = threading.Thread(name = "thread1",target=scptransfer,args=(sshClient,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE,recName))
-        t1.start()
-        ts = timestamp()
-        recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
+            #t2 = threading.Thread( name = "tread2",target= filesManagSend,args=(files,SERVER,USER,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE))
+            #t2.start()
+            executor.submit(filesManagSend,files,SERVER,USER,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE)
+        for i in range(10):
+            recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
+            sshClient = sshLogin(SERVER,USER)
+            #t1 = threading.Thread(name = "thread1",target=scptransfer,args=(sshClient,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE,recName))
+            #t1.start()
+            executor.submit(scptransfer,sshClient,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE,recName)
+            ts = timestamp()
+            recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
     finally:
         print(timestamp() + "Cerrando cámara")
         camera.close()
         sshLogout(sshClient)
         removeFile(piPath,REGISTER_NAME_TO_DELATE)
-        t1.join()
-        if len(files) > 0 :
-            t2.join()
+        executor.shutdown(wait=True)
+        #t1.join()
+        #if len(files) > 0 :
+        #    t2.join()

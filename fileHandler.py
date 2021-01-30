@@ -28,6 +28,7 @@ def sshLogin(server,user):
 
 def sshLogout(sshClient):
     sshClient.close()
+    print ('Cerrando conexión')
 
 def scptransfer(sshClient,origin,destination,regDelName,recName):
     
