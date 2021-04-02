@@ -9,8 +9,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 #Const
 SERVER = '192.168.1.80'
-USER = 'pi'
-SERVER_PATH = '/media/pi/Seagate Expansion Drive/PiCamera'
+USER = 'miguelangel'
+SERVER_PATH = '/sharedfolders/PiCamera'
 PI_PATH = '/media/pi/276E-0D81/'
 FOLDER_NAME = 'myVideos'
 REGISTER_NAME = 'register.txt'
@@ -41,7 +41,7 @@ def rec (camera,path,ts,regName,regDelName):
     camera.annotate_text = timestamp()
     print(timestamp() + " Grabando archivo: " + recName)
     camera.start_recording(pathRecName,sps_timing=True,bitrate=10000000)
-    camera.wait_recording(3600)
+    camera.wait_recording(60)
     camera.stop_recording()
     print(timestamp() + " Grabación finalizada archivo: " + recName)
     recRegister(path,regName,recName)
@@ -69,11 +69,14 @@ if __name__ == "__main__":
         if len(files) > 0 :
             executor.submit(filesManagSend,files,SERVER,USER,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE)
         for i in range(3):
+            print ("Pasada antes de grabar")
             recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
             sshClient = sshLogin(SERVER,USER)
             executor.submit(scptransfer,sshClient,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE,recName)
             ts = timestamp()
-            recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
+            
+            #recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
+            print ("Después de grabar")
     finally:
         print(timestamp() + "Cerrando cámara")
         camera.close()

@@ -10,9 +10,9 @@ from camera import timestamp
 #Const
 #I don't need password since i have the public key on the server.
 SERVER = '192.168.1.80'
-USER = 'pi'
+USER = 'root'
 PI_PATH = '/media/pi/276E-0D81/myVideos/'
-SERVER_PATH = '/media/pi/Seagate Expansion Drive/PiCamera'
+SERVER_PATH = '/sharedfolders/PiCamera'
 REGISTER_NAME = "register.txt"
 REGISTER_NAME_TO_DELATE = "registerToDelete.txt"
 
