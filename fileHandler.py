@@ -12,7 +12,7 @@ from camera import timestamp
 SERVER = '192.168.1.80'
 USER = 'root'
 PI_PATH = '/media/pi/276E-0D81/myVideos/'
-SERVER_PATH = '/sharedfolders/PiCamera'
+SERVER_PATH = '/sharedfolders/PiCamera/'
 REGISTER_NAME = "register.txt"
 REGISTER_NAME_TO_DELATE = "registerToDelete.txt"
 
@@ -99,15 +99,16 @@ def Files(path):
     for content in contents:
         if re.search('(?<=).h264',content):
             contentsToSend.append(content)
-    print (timestamp() + ' Archivos no enviados: ' + str(contentsToSend))
+    print (timestamp() + ' Archivos localizados en el servidor: ' + str(contentsToSend))
     return contentsToSend
 
 if __name__ == '__main__':
     try:
         print (Files(PI_PATH))
-        #sshClient = sshLogin()
+        #sshClient = sshLogin(SERVER,USER)
         #scpClient = scptransfer(sshClient,FILE,DESTINATION_PATH)
-        #closeClients(sshClient)
+        #Files(PI_PATH)
+        #sshLogout(sshClient)
 
         #for i in range(10):
 

@@ -41,7 +41,7 @@ def rec (camera,path,ts,regName,regDelName):
     camera.annotate_text = timestamp()
     print(timestamp() + " Grabando archivo: " + recName)
     camera.start_recording(pathRecName,sps_timing=True,bitrate=10000000)
-    camera.wait_recording(60)
+    camera.wait_recording(3600)
     camera.stop_recording()
     print(timestamp() + " Grabación finalizada archivo: " + recName)
     recRegister(path,regName,recName)
