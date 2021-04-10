@@ -5,6 +5,7 @@ import scp
 from datetime import datetime, time
 import os 
 import re
+from pathlib import Path
 #from camera import timestamp
 
 #Const
@@ -39,7 +40,7 @@ def recRegister (pathRegister,registerName,recName):
     register.close()
 
 def recRegisterToDelete (pathRegister,regDelName,recName):
-    
+    # I have to create a function to check if the file existis or not
     print("Añadiendo: " + recName )
     register = open(pathRegister + regDelName,"a")
     register.write(recName + "\n")
@@ -90,7 +91,7 @@ def Files(path):
     for content in contents:
         if re.search('(?<=).h264',content):
             contentsToSend.append(content)
-    print (timestamp() + ' Archivos no enviados: ' + str(contentsToSend))
+    #print (timestamp() + ' Archivos no enviados: ' + str(contentsToSend))
     return contentsToSend
 
 if __name__ == '__main__':

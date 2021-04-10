@@ -19,9 +19,10 @@ def filesCopy(dic):
     for key,value in dic.items():
         
         for nameFile in value:
-            
-            #shutil.copy(dic[nameFodelr[]])
-            recRegisterToDelete(SERVER_PATH,REGISTER_NAME_TO_DELATE,nameFile)
+            folderPath = SERVER_PATH + "/" + key + "/"
+            filePath = SERVER_PATH + "/" + nameFile
+            #shutil.copy(filePath,folderPath)
+            #recRegisterToDelete(SERVER_PATH,REGISTER_NAME_TO_DELATE,nameFile)
             print (timestamp() + " Archivo copiado: " + key + ":" + nameFile)
 
 
@@ -29,16 +30,15 @@ def createDir(dirName):
     #This funciton creates Directories
     try:
         #os.mkdir(SERVER_PATH + dirName)
-        print (timestamp() + 'Creando Directorio:  ' + dirName)
+        print (timestamp() + ' Creando Directorio:  ' + dirName)
     except OSError as e:
         print(timestamp() + e)
 
 
-def checkFilesTime(list):
+def recHandler(list):
     # Dictionary file organization
     oldName = ""
     dic = {}
-    auxList = [""]
 
     for file in list:
         nameDir = file.split ("T")
@@ -46,6 +46,7 @@ def checkFilesTime(list):
         if nameDir[0] != oldName:
             auxList = []
             dic[nameDir[0]] = [file]
+            createDir(nameDir[0])
             oldName = nameDir[0]
             #print(str(dic))
         else:
@@ -57,9 +58,7 @@ if __name__ == '__main__':
 
     try:
         files = Files(SERVER_PATH)
-        print (timestamp() + str(files))
-        dic = checkFilesTime(files)
-        print ("Imprimiendo 2: " + str(dic))
+        dic = recHandler(files)
         filesCopy(dic)
 
     finally:
