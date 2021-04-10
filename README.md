@@ -2,3 +2,5 @@
 
 eval `ssh-agent`
 ssh-add
+
+# Configuration
