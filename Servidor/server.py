@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from fileHandlerServer import Files
+from fileHandlerServer import Files, recRegisterToDelete
 from datetime import datetime, time
 import os
 #import numpy as np
 import shutil
 
 SERVER_PATH = '/sharedfolders/PiCamera/'
+REGISTER_NAME_TO_DELATE = 'registerToDelete.txt'
 
 
 def timestamp():
@@ -15,21 +16,26 @@ def timestamp():
 
 def filesCopy(dic):
 
-    for nameFolder in dic:
-        for nameFile in nameFolder:
-            print (nameFile)
+    for key,value in dic.items():
+        
+        for nameFile in value:
+            
             #shutil.copy(dic[nameFodelr[]])
+            recRegisterToDelete(SERVER_PATH,REGISTER_NAME_TO_DELATE,nameFile)
+            print (timestamp() + " Archivo copiado: " + key + ":" + nameFile)
 
 
 def createDir(dirName):
+    #This funciton creates Directories
     try:
-        os.mkdir(SERVER_PATH + dirName)
+        #os.mkdir(SERVER_PATH + dirName)
         print (timestamp() + 'Creando Directorio:  ' + dirName)
     except OSError as e:
         print(timestamp() + e)
 
 
 def checkFilesTime(list):
+    # Dictionary file organization
     oldName = ""
     dic = {}
     auxList = [""]
@@ -53,6 +59,7 @@ if __name__ == '__main__':
         files = Files(SERVER_PATH)
         print (timestamp() + str(files))
         dic = checkFilesTime(files)
+        print ("Imprimiendo 2: " + str(dic))
         filesCopy(dic)
 
     finally:

@@ -40,6 +40,7 @@ def recRegister (pathRegister,registerName,recName):
 
 def recRegisterToDelete (pathRegister,regDelName,recName):
     
+    print("Añadiendo: " + recName )
     register = open(pathRegister + regDelName,"a")
     register.write(recName + "\n")
     register.close()
