@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 SERVER = '192.168.1.80'
 USER = 'miguelangel'
 SERVER_PATH = '/sharedfolders/PiCamera'
-PI_PATH = '/media/pi/276E-0D81/'
+PI_PATH = '/media/pi/00A3-2262/'
 FOLDER_NAME = 'myVideos'
 REGISTER_NAME = 'register.txt'
 REGISTER_NAME_TO_DELATE = 'registerToDelete.txt'
@@ -41,17 +41,27 @@ def rec (camera,path,ts,regName,regDelName):
     camera.annotate_text = timestamp()
     print(timestamp() + " Grabando archivo: " + recName)
     camera.start_recording(pathRecName,sps_timing=True,bitrate=10000000)
-    camera.wait_recording(3600)
+    camera.wait_recording(60)
     camera.stop_recording()
     print(timestamp() + " Grabación finalizada archivo: " + recName)
     recRegister(path,regName,recName)
     return recName
+
 def filesManagSend(files,server,user,origin,destination,regDelName):
+    #This function it's exclisvie to send the file afeter record
     sshClient = sshLogin(server,user)
+    i = 0
     for f in files:
+        i = i + 1
         scptransfer(sshClient,origin,destination,regDelName,f)
+        print(timestamp() + "Archivos transferidos: " + str(i) + "/" + str(len(files)))
     sshLogout(sshClient)
 
+def fileManagSend(f,server,user,origin,destination,regDelName):
+    #This function it's exclisvie to send the file afeter record
+    sshClient = sshLogin(server,user)
+    scptransfer(sshClient,origin,destination,regDelName,f)
+    sshLogout(sshClient)
 
 if __name__ == "__main__":
 
@@ -65,21 +75,25 @@ if __name__ == "__main__":
         createDirRec(FOLDER_NAME)
         ts = timestamp()
         piPath = PI_PATH + FOLDER_NAME + '/'
+        executor.submit(removeFile,piPath,REGISTER_NAME_TO_DELATE)
         files = Files(piPath)
         if len(files) > 0 :
             executor.submit(filesManagSend,files,SERVER,USER,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE)
+            #removeFile(piPath,REGISTER_NAME_TO_DELATE)
         for i in range(3):
             print ("Pasada antes de grabar")
             recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
-            sshClient = sshLogin(SERVER,USER)
-            executor.submit(scptransfer,sshClient,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE,recName)
+            #sshClient = sshLogin(SERVER,USER)
+            executor.submit(fileManagSend,recName,SERVER,USER,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE)
+            #executor.submit(scptransfer,sshClient,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE,recName)
             ts = timestamp()
-            
             #recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
             print ("Después de grabar")
+            print (str(i))
+
     finally:
         print(timestamp() + "Cerrando cámara")
         camera.close()
-        sshLogout(sshClient)
+        #sshLogout(sshClient)
         removeFile(piPath,REGISTER_NAME_TO_DELATE)
         executor.shutdown(wait=True)

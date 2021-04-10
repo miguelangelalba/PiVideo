@@ -11,7 +11,7 @@ from camera import timestamp
 #I don't need password since i have the public key on the server.
 SERVER = '192.168.1.80'
 USER = 'root'
-PI_PATH = '/media/pi/276E-0D81/myVideos/'
+PI_PATH = '/media/pi/00A3-2262/myVideos/'
 SERVER_PATH = '/sharedfolders/PiCamera/'
 REGISTER_NAME = "register.txt"
 REGISTER_NAME_TO_DELATE = "registerToDelete.txt"
@@ -36,7 +36,7 @@ def scptransfer(sshClient,origin,destination,regDelName,recName):
     scpClient = scp.SCPClient(sshClient.get_transport())
     print ( timestamp() + ' Trasnfiriendo archivo: ' + pathOriginName)
     scpClient.put(pathOriginName,destination)
-    print (timestamp() + ' Archivo trasnferido a:' + destination)
+    print (timestamp() + ' Archivo ' + recName + ' trasnferido a:' + destination)
     recRegisterToDelete(origin,regDelName,recName)
     scpClient.close()
 
@@ -74,7 +74,7 @@ def delLineStrings(path,recName,fileName):
             pass
         else:
             f.write(line)
-            print (timestamp() + ' Archivo: ' + recName + ' borrado')
+            #print (timestamp() + ' Archivo: ' + recName + ' borrado')
 
 def readLines(path,fileName):
     pathFileName = path + fileName
@@ -86,11 +86,12 @@ def readLines(path,fileName):
 def removeFile(path,regToDelete):
 
     lines = readLines(path,regToDelete)
-
+    i = 0
     for line in lines:
+        i = i + 1
         pathRecName = path + line
         os.remove(pathRecName.replace('\n',""))
-        print (timestamp() + ' Archivo: ' + line + ' borrado')
+        print (timestamp() + ' Archivo: ' + line + ' borrado' + str(i) + "/"+ str(len(lines)))
         delLineStrings(path,line,regToDelete)    
 
 def Files(path):
