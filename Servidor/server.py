@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from fileHandlerServer import Files, recRegisterToDelete
+from fileHandlerServer import Files, recRegisterToDelete, removeFile
 from datetime import datetime, time
 import os
 #import numpy as np
@@ -21,18 +21,18 @@ def filesCopy(dic):
         for nameFile in value:
             folderPath = SERVER_PATH + "/" + key + "/"
             filePath = SERVER_PATH + "/" + nameFile
-            #shutil.copy(filePath,folderPath)
-            #recRegisterToDelete(SERVER_PATH,REGISTER_NAME_TO_DELATE,nameFile)
-            print (timestamp() + " Archivo copiado: " + key + ":" + nameFile)
+            shutil.copy(filePath,folderPath)
+            recRegisterToDelete(SERVER_PATH,REGISTER_NAME_TO_DELATE,nameFile)
+            print (timestamp() + " Archivo copiado: " + key + "/cd .." + nameFile)
 
 
 def createDir(dirName):
     #This funciton creates Directories
     try:
-        #os.mkdir(SERVER_PATH + dirName)
+        os.mkdir(SERVER_PATH + dirName)
         print (timestamp() + ' Creando Directorio:  ' + dirName)
     except OSError as e:
-        print(timestamp() + e)
+        print(timestamp() + str(e))
 
 
 def recHandler(list):
@@ -60,6 +60,7 @@ if __name__ == '__main__':
         files = Files(SERVER_PATH)
         dic = recHandler(files)
         filesCopy(dic)
+        removeFile(SERVER_PATH,REGISTER_NAME_TO_DELATE)
 
     finally:
         print ("Terminando script")
