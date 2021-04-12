@@ -37,7 +37,7 @@ def rec (camera,path,ts,regName,regDelName):
     camera.exposure_mode = ('night')
     camera.clock_mode = ('raw')
     camera.framerate = (5)
-    camera.start_preview()
+    #camera.start_preview()
     camera.annotate_text = timestamp()
     print(timestamp() + " Grabando archivo: " + recName)
     camera.start_recording(pathRecName,sps_timing=True,bitrate=10000000)
@@ -62,6 +62,8 @@ def fileManagSend(f,server,user,origin,destination,regDelName):
     sshClient = sshLogin(server,user)
     scptransfer(sshClient,origin,destination,regDelName,f)
     sshLogout(sshClient)
+    removeFile(piPath,REGISTER_NAME_TO_DELATE)
+
 
 if __name__ == "__main__":
 
