@@ -1,17 +1,17 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
+#!/usr/bin/python3 -*- coding: utf-8 -*-
 
 from picamera import PiCamera
 from datetime import datetime, time
 import os
 from fileHandler import *
 from concurrent.futures import ThreadPoolExecutor
+import logging
 
 #Const
 SERVER = '192.168.1.80'
 USER = 'miguelangel'
 SERVER_PATH = '/sharedfolders/PiCamera'
-PI_PATH = '/media/pi/00A3-2262/'
+PI_PATH = '/media/pi/00A3-22621/'
 FOLDER_NAME = 'myVideos'
 REGISTER_NAME = 'register.txt'
 REGISTER_NAME_TO_DELATE = 'registerToDelete.txt'
@@ -25,6 +25,7 @@ def createDirRec(folderName):
     try:
         os.mkdir(PI_PATH + folderName)
         print ('Creando folder ' + folderName)
+        logging.info('Creando folder %s',folderName)
     except OSError as e:
         print(e)
 def rec (camera,path,ts,regName,regDelName):
@@ -40,10 +41,12 @@ def rec (camera,path,ts,regName,regDelName):
     #camera.start_preview()
     camera.annotate_text = timestamp()
     print(timestamp() + " Grabando archivo: " + recName)
+    logging.info(timestamp() + " Grabando archivo: %s ", recName)
     camera.start_recording(pathRecName,sps_timing=True,bitrate=10000000)
-    camera.wait_recording(60)
+    camera.wait_recording(1800)
     camera.stop_recording()
     print(timestamp() + " Grabación finalizada archivo: " + recName)
+    logging.info(timestamp() + " Grabación finalizada archivo: %s", recName)
     recRegister(path,regName,recName)
     return recName
 
@@ -55,6 +58,7 @@ def filesManagSend(files,server,user,origin,destination,regDelName):
         i = i + 1
         scptransfer(sshClient,origin,destination,regDelName,f)
         print(timestamp() + "Archivos transferidos: " + str(i) + "/" + str(len(files)))
+        logging.info(timestamp() + "Archivos transferidos: " + str(i) + "/" + str(len(files)))
     sshLogout(sshClient)
 
 def fileManagSend(f,server,user,origin,destination,regDelName):
@@ -69,6 +73,7 @@ if __name__ == "__main__":
 
   
     #path = '/media/pi/0113-44041/'
+    logging.basicConfig(filename=PI_PATH + 'camera.log',level='DEBUG')
     camera = PiCamera()
     files = []
     executor = ThreadPoolExecutor(max_workers=3)
