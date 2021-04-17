@@ -5,51 +5,58 @@ import paramiko
 from datetime import datetime, time
 import os 
 import re
-from camera import timestamp
+#from camera import timestamp
+from loggerFormat import logsFormat
 
 #Const
 #I don't need password since i have the public key on the server.
 SERVER = '192.168.1.80'
 USER = 'root'
-PI_PATH = '/media/pi/00A3-2262/myVideos/'
+PI_PATH = '/media/pi/00A3-22621/myVideos/'
 SERVER_PATH = '/sharedfolders/PiCamera/'
 REGISTER_NAME = "register.txt"
 REGISTER_NAME_TO_DELATE = "registerToDelete.txt"
+LOG_FILE_NAME = 'camera.log'
+
+#Log 
+logger = logsFormat(__name__,PI_PATH,LOG_FILE_NAME)
 
 def sshLogin(server,user):
     try:
         sshClientLogin = paramiko.SSHClient()
         sshClientLogin.set_missing_host_key_policy( paramiko.AutoAddPolicy() )
-        sshClientLogin.connect(server, username=user)
-        print('Conexión con el ' + server + ' establecida')
+        sshClientLogin.connect(server, username = user)
+        logger.info('Conexión con el ' + server + ' establecida')
         return sshClientLogin
+
     except paramiko.ssh_exception.AuthenticationException as e:
-        print('Contraseña incorrecta')
+        logger.error('Contraseña incorrecta' + str(e))
 
 def sshLogout(sshClient):
     sshClient.close()
-    print ('Cerrando conexión')
+    logger.info('Cerrando conexión')
 
 def scptransfer(sshClient,origin,destination,regDelName,recName):
     
     pathOriginName = origin + recName 
     scpClient = scp.SCPClient(sshClient.get_transport())
-    print ( timestamp() + ' Trasnfiriendo archivo: ' + pathOriginName)
+    logger.info('Trasnfiriendo archivo: ' + pathOriginName)
     scpClient.put(pathOriginName,destination)
-    print (timestamp() + ' Archivo ' + recName + ' trasnferido a:' + destination)
+    logger.info('Archivo ' + recName + ' trasnferido a:' + destination)
     recRegisterToDelete(origin,regDelName,recName)
     scpClient.close()
 
 def recRegister (pathRegister,registerName,recName):
 
     register = open(pathRegister + registerName,"a")
-    print (timestamp() + ' Se ha añadido la grabación a ' + registerName)
+    logger.info('Se ha añadido la grabación a ' + registerName)
     #register = open(recName,"a")
     register.write(recName + "\n")
     register.close()
 
 def recRegisterToDelete (pathRegister,regDelName,recName):
     
+    logger.info('Añadiendo: ' + recName)
     register = open(pathRegister + regDelName,"a")
     register.write(recName + "\n")
     register.close()
@@ -57,7 +64,8 @@ def recRegisterToDelete (pathRegister,regDelName,recName):
 def fileReader (path,fileName):
     #This function in the future can will delete. It's just to make some proves.
     f = open(fileName,"r")
-    print(f.read())
+    logger.info(f.read())
+
     f.close()
     #for line  in f
 
@@ -74,7 +82,7 @@ def delLineStrings(path,recName,fileName):
             pass
         else:
             f.write(line)
-            #print (timestamp() + ' Archivo: ' + recName + ' borrado')
+            logger.info('Archivo: ' + recName + ' borrado')
 
 def readLines(path,fileName):
     pathFileName = path + fileName
@@ -91,7 +99,8 @@ def removeFile(path,regToDelete):
         i = i + 1
         pathRecName = path + line
         os.remove(pathRecName.replace('\n',""))
-        print (timestamp() + ' Archivo: ' + line + ' borrado' + str(i) + "/"+ str(len(lines)))
+        logger.info('Archivo: ' + line + ' borrado' + str(i) + "/"+ str(len(lines)))
+
         delLineStrings(path,line,regToDelete)    
 
 def Files(path):
@@ -100,12 +109,13 @@ def Files(path):
     for content in contents:
         if re.search('(?<=).h264',content):
             contentsToSend.append(content)
-    print (timestamp() + ' Archivos localizados en el servidor: ' + str(contentsToSend))
+    logger.info('Archivos localizados en memoria: ' + str(contentsToSend))
+
     return contentsToSend
 
 if __name__ == '__main__':
     try:
-        print (Files(PI_PATH))
+        logger.info(Files(PI_PATH))
         #sshClient = sshLogin(SERVER,USER)
         #scpClient = scptransfer(sshClient,FILE,DESTINATION_PATH)
         #Files(PI_PATH)
@@ -119,4 +129,4 @@ if __name__ == '__main__':
         #delLineStrings("Linea 4",REGISTER_NAME,SERVER_PATH)
 
     except paramiko.ssh_exception.AuthenticationException as e:
-        print('Contraseña incorrecta')
+        logger.warning('Contraseña incorrecta' + str(e))
