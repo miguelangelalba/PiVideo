@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 import scp
 #import paramiko
-from datetime import datetime, time
 import os 
 import re
 from pathlib import Path
+from loggerFormat import logsFormat
 #from camera import timestamp
 
 #Const
@@ -16,32 +16,34 @@ PI_PATH = '/media/pi/276E-0D81/myVideos/'
 SERVER_PATH = '/sharedfolders/PiCamera/'
 REGISTER_NAME = "register.txt"
 REGISTER_NAME_TO_DELATE = "registerToDelete.txt"
+LOG_FILE_NAME = 'server.log'
 
-def timestamp():
-    return datetime.now().isoformat()
-    #Returns a timsStam at the instant it runs in the function in ISO format.
+
+#Logs
+
+logger = logsFormat(__name__,SERVER_PATH,LOG_FILE_NAME)
 
 def scptransfer(sshClient,origin,destination,regDelName,recName):
     
     pathOriginName = origin + recName 
     scpClient = scp.SCPClient(sshClient.get_transport())
-    print ( timestamp() + ' Trasnfiriendo archivo: ' + pathOriginName)
+    logger.info('Trasnfiriendo archivo: ' + pathOriginName)
     scpClient.put(pathOriginName,destination)
-    print (timestamp() + ' Archivo trasnferido a:' + destination)
+    logger.info('Archivo ' + recName + ' trasnferido a:' + destination)
     recRegisterToDelete(origin,regDelName,recName)
     scpClient.close()
 
 def recRegister (pathRegister,registerName,recName):
 
     register = open(pathRegister + registerName,"a")
-    print (timestamp() + ' Se ha añadido la grabación a ' + registerName)
+    logger.info('Se ha añadido la grabación a ' + registerName)
     #register = open(recName,"a")
     register.write(recName + "\n")
     register.close()
 
 def recRegisterToDelete (pathRegister,regDelName,recName):
     # I have to create a function to check if the file existis or not
-    print("Añadiendo: " + recName )
+    logger.info('Añadiendo: ' + recName)
     register = open(pathRegister + regDelName,"a")
     register.write(recName + "\n")
     register.close()
@@ -49,7 +51,8 @@ def recRegisterToDelete (pathRegister,regDelName,recName):
 def fileReader (path,fileName):
     #This function in the future can will delete. It's just to make some proves.
     f = open(fileName,"r")
-    print(f.read())
+    logger.info(f.read())
+
     f.close()
     #for line  in f
 
@@ -66,7 +69,7 @@ def delLineStrings(path,recName,fileName):
             pass
         else:
             f.write(line)
-            print (timestamp() + ' Archivo: ' + recName + ' borrado')
+            logger.info('Archivo: ' + recName + ' borrado')
 
 def readLines(path,fileName):
     pathFileName = path + fileName
@@ -78,11 +81,13 @@ def readLines(path,fileName):
 def removeFile(path,regToDelete):
 
     lines = readLines(path,regToDelete)
-
+    i = 0
     for line in lines:
+        i = i + 1
         pathRecName = path + line
         os.remove(pathRecName.replace('\n',""))
-        print (timestamp() + ' Archivo: ' + line + ' borrado')
+        logger.info('Archivo: ' + line + ' borrado' + str(i) + "/"+ str(len(lines)))
+
         delLineStrings(path,line,regToDelete)    
 
 def Files(path):
@@ -91,11 +96,10 @@ def Files(path):
     for content in contents:
         if re.search('(?<=).h264',content):
             contentsToSend.append(content)
-    #print (timestamp() + ' Archivos no enviados: ' + str(contentsToSend))
     return contentsToSend
 
 if __name__ == '__main__':
-    print (Files(PI_PATH))
+    logger.info(Files(PI_PATH))
     #sshClient = sshLogin(SERVER,USER)
         #scpClient = scptransfer(sshClient,FILE,DESTINATION_PATH)
         #Files(PI_PATH)

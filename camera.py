@@ -5,7 +5,8 @@ from datetime import datetime, time
 import os
 from fileHandler import *
 from concurrent.futures import ThreadPoolExecutor
-import logging
+from loggerFormat import logsFormat
+#import logging
 
 #Const
 SERVER = '192.168.1.80'
@@ -15,19 +16,23 @@ PI_PATH = '/media/pi/00A3-22621/'
 FOLDER_NAME = 'myVideos'
 REGISTER_NAME = 'register.txt'
 REGISTER_NAME_TO_DELATE = 'registerToDelete.txt'
+LOG_FILE_NAME = 'camera.log'
+LOG_LEVEL = 'DEBUG'
+#Logs
 
+logger = logsFormat('camera',PI_PATH,LOG_FILE_NAME)
 
 def timestamp():
-    return datetime.now().isoformat(timespec= 'seconds')
     #Returns a timsStam at the instant it runs in the function in ISO format.
+    return datetime.now().isoformat(timespec= 'seconds')
+    
 
 def createDirRec(folderName):
     try:
         os.mkdir(PI_PATH + folderName)
-        print ('Creando folder ' + folderName)
-        logging.info('Creando folder %s',folderName)
+        logger.info('Creando folder %s',folderName)
     except OSError as e:
-        print(e)
+        logger.info(e)
 def rec (camera,path,ts,regName,regDelName):
     #I hace to format the timestamp becouse Raspivid doesn't accept the ":" in a file name.
     
@@ -40,13 +45,11 @@ def rec (camera,path,ts,regName,regDelName):
     camera.framerate = (5)
     #camera.start_preview()
     camera.annotate_text = timestamp()
-    print(timestamp() + " Grabando archivo: " + recName)
-    logging.info(timestamp() + " Grabando archivo: %s ", recName)
+    logger.info('Grabando archivo: %s ', recName)
     camera.start_recording(pathRecName,sps_timing=True,bitrate=10000000)
     camera.wait_recording(1800)
     camera.stop_recording()
-    print(timestamp() + " Grabación finalizada archivo: " + recName)
-    logging.info(timestamp() + " Grabación finalizada archivo: %s", recName)
+    logger.info('Grabación finalizada archivo: %s', recName)
     recRegister(path,regName,recName)
     return recName
 
@@ -57,8 +60,7 @@ def filesManagSend(files,server,user,origin,destination,regDelName):
     for f in files:
         i = i + 1
         scptransfer(sshClient,origin,destination,regDelName,f)
-        print(timestamp() + "Archivos transferidos: " + str(i) + "/" + str(len(files)))
-        logging.info(timestamp() + "Archivos transferidos: " + str(i) + "/" + str(len(files)))
+        logger.info('Archivos transferidos: ' + str(i) + '/' + str(len(files)))
     sshLogout(sshClient)
 
 def fileManagSend(f,server,user,origin,destination,regDelName):
@@ -68,12 +70,13 @@ def fileManagSend(f,server,user,origin,destination,regDelName):
     sshLogout(sshClient)
     removeFile(piPath,REGISTER_NAME_TO_DELATE)
 
-
 if __name__ == "__main__":
+    
 
   
     #path = '/media/pi/0113-44041/'
-    logging.basicConfig(filename=PI_PATH + 'camera.log',level='DEBUG')
+    #logging.basicConfig(filename = PI_PATH + 'camera.log',format = 'asctime', level = 'DEBUG')
+    #logger = logsFormat(PI_PATH,LOG_FILE_NAME)
     camera = PiCamera()
     files = []
     executor = ThreadPoolExecutor(max_workers=3)
@@ -100,7 +103,7 @@ if __name__ == "__main__":
             print (str(i))
 
     finally:
-        print(timestamp() + "Cerrando cámara")
+        logger.info('Cerrando Cámara')
         camera.close()
         #sshLogout(sshClient)
         removeFile(piPath,REGISTER_NAME_TO_DELATE)

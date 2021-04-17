@@ -2,17 +2,18 @@
 # -*- coding: utf-8 -*-
 
 from fileHandlerServer import Files, recRegisterToDelete, removeFile
-from datetime import datetime, time
 import os
 #import numpy as np
 import shutil
+from loggerFormat import logsFormat
 
+#Const
 SERVER_PATH = '/sharedfolders/PiCamera/'
 REGISTER_NAME_TO_DELATE = 'registerToDelete.txt'
+LOG_FILE_NAME = 'server.log'
+#Logs
 
-
-def timestamp():
-    return datetime.now().isoformat()
+logger = logsFormat('server',SERVER_PATH,LOG_FILE_NAME)
 
 def filesCopy(dic):
 
@@ -23,16 +24,16 @@ def filesCopy(dic):
             filePath = SERVER_PATH + "/" + nameFile
             shutil.copy(filePath,folderPath)
             recRegisterToDelete(SERVER_PATH,REGISTER_NAME_TO_DELATE,nameFile)
-            print (timestamp() + " Archivo copiado: " + key + "/cd .." + nameFile)
-
+            logger.info('Archivo copiado: ' + key + '/cd ..' + nameFile)
 
 def createDir(dirName):
     #This funciton creates Directories
     try:
         os.mkdir(SERVER_PATH + dirName)
-        print (timestamp() + ' Creando Directorio:  ' + dirName)
+        logger.info('Creando Directorio: ' + dirName)
+
     except OSError as e:
-        print(timestamp() + str(e))
+        logger.info(str(e))
 
 
 def recHandler(list):
@@ -42,16 +43,14 @@ def recHandler(list):
 
     for file in list:
         nameDir = file.split ("T")
-        #print ("Nombre de archivo: " + str(nameDir))
         if nameDir[0] != oldName:
-            auxList = []
             dic[nameDir[0]] = [file]
             createDir(nameDir[0])
             oldName = nameDir[0]
-            #print(str(dic))
         else:
             dic[nameDir[0]].append(file)
-    print ("Imprimiendo diccionario: " + str(dic))
+    logger.info('Imprimiendo diccionario: ' + str(dic))
+
     return dic
 
 if __name__ == '__main__':
@@ -63,4 +62,4 @@ if __name__ == '__main__':
         removeFile(SERVER_PATH,REGISTER_NAME_TO_DELATE)
 
     finally:
-        print ("Terminando script")
+        logger.info('Terminando script')
