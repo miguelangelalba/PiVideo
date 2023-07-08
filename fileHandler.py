@@ -12,7 +12,8 @@ from loggerFormat import logsFormat
 #I don't need password since i have the public key on the server.
 SERVER = '192.168.1.80'
 USER = 'root'
-PI_PATH = '/media/pi/00A3-22621/myVideos/'
+PI_PATH = '/media/pi/884cfa6c-fbea-41fe-b344-c5c87cb550c8/myVideos/'
+LOG_PATH = '/media/pi/884cfa6c-fbea-41fe-b344-c5c87cb550c8/'
 SERVER_PATH = '/sharedfolders/PiCamera/'
 REGISTER_NAME = "register.txt"
 REGISTER_NAME_TO_DELATE = "registerToDelete.txt"
@@ -115,10 +116,11 @@ def Files(path):
 
 if __name__ == '__main__':
     try:
-        logger.info(Files(PI_PATH))
+        logger.info(Files(LOG_PATH))
         #sshClient = sshLogin(SERVER,USER)
         #scpClient = scptransfer(sshClient,FILE,DESTINATION_PATH)
-        #Files(PI_PATH)
+        f = Files(PI_PATH)
+        print (f)
         #sshLogout(sshClient)
 
         #for i in range(10):
