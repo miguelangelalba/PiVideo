@@ -92,7 +92,7 @@ if __name__ == "__main__":
         files = Files(piPath)
         if len(files) > 0 :
             executor.submit(filesManagSend,files,SERVER,USER,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE)
-            #removeFile(piPath,REGISTER_NAME_TO_DELATE)
+            removeFile(piPath,REGISTER_NAME_TO_DELATE)
         for i in range(3):
             print ("Pasada antes de grabar")
             recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
