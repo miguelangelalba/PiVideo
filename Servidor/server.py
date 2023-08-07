@@ -56,6 +56,7 @@ def recHandler(list):
 if __name__ == '__main__':
 
     try:
+        removeFile(SERVER_PATH,REGISTER_NAME_TO_DELATE)
         files = Files(SERVER_PATH)
         dic = recHandler(files)
         filesCopy(dic)

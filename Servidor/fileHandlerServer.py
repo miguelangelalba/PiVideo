@@ -102,7 +102,8 @@ if __name__ == '__main__':
     logger.info(Files(PI_PATH))
     #sshClient = sshLogin(SERVER,USER)
         #scpClient = scptransfer(sshClient,FILE,DESTINATION_PATH)
-        #Files(PI_PATH)
+    f = Files(SERVER_PATH)
+    print (f)
         #sshLogout(sshClient)
 
         #for i in range(10):

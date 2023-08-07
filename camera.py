@@ -9,9 +9,10 @@ from loggerFormat import logsFormat
 #import logging
 
 #Const
-SERVER = '192.168.1.80'
+SERVER = '192.168.1.147'
 USER = 'miguelangel'
-SERVER_PATH = '/sharedfolders/PiCamera'
+#SERVER_PATH = '/sharedfolders/PiCamera'
+SERVER_PATH = '/srv/dev-disk-by-uuid-19926591486E72B1'
 #PI_PATH = '/media/pi/00A3-22621/'
 PI_PATH = '/media/pi/884cfa6c-fbea-41fe-b344-c5c87cb550c8/'
 FOLDER_NAME = 'myVideos'
@@ -95,17 +96,17 @@ if __name__ == "__main__":
         for i in range(3):
             print ("Pasada antes de grabar")
             recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
-            #sshClient = sshLogin(SERVER,USER)
+            sshClient = sshLogin(SERVER,USER)
             executor.submit(fileManagSend,recName,SERVER,USER,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE)
-            #executor.submit(scptransfer,sshClient,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE,recName)
+            executor.submit(scptransfer,sshClient,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE,recName)
             ts = timestamp()
-            #recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
+            recName = rec(camera,piPath,ts,REGISTER_NAME,REGISTER_NAME_TO_DELATE)
             print ("Después de grabar")
             print (str(i))
 
     finally:
         logger.info('Cerrando Cámara')
         camera.close()
-        #sshLogout(sshClient)
+        sshLogout(sshClient)
         removeFile(piPath,REGISTER_NAME_TO_DELATE)
         executor.shutdown(wait=True)
