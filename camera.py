@@ -88,7 +88,7 @@ if __name__ == "__main__":
         ts = timestamp()
         piPath = PI_PATH + FOLDER_NAME + '/'
         #executor.submit(removeFile,piPath,REGISTER_NAME_TO_DELATE)
-        removeFile(piPath,REGISTER_NAME_TO_DELATE)
+        #removeFile(piPath,REGISTER_NAME_TO_DELATE)
         files = Files(piPath)
         if len(files) > 0 :
             executor.submit(filesManagSend,files,SERVER,USER,piPath,SERVER_PATH,REGISTER_NAME_TO_DELATE)
